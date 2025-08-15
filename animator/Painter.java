@@ -134,10 +134,10 @@ public class Painter {
 
         while (dx <= dy) {
             // Plot all 4 quadrants
-            plot(xc + x, yc + y, 1);
-            plot(xc - x, yc + y, 1);
-            plot(xc + x, yc - y, 1);
-            plot(xc - x, yc - y, 1);
+            plot(xc + x, yc + y);
+            plot(xc - x, yc + y);
+            plot(xc + x, yc - y);
+            plot(xc - x, yc - y);
 
             x++;
             dx = dx + twoB2;
