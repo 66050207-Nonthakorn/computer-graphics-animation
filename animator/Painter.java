@@ -84,16 +84,6 @@ public class Painter {
     public void setOutlineThickness(int thickness) {
         this.lineThickness = thickness;
     }
-
-    public void setScale(int x, int y) {
-        double[] mat = {
-            0, 0,
-            0, 0,
-            x, y
-        };
-
-        frameG.setTransform(new AffineTransform(mat));
-    }
     
     public void plot(int x, int y, int size) {
         this.bufferG[currentLayer].fillRect(x, y, size, size);
@@ -302,7 +292,6 @@ public class Painter {
 
     @Override
     protected void finalize() {
-        // Clean up graphics resources
         for (Graphics2D g : bufferG) {
             if (g != null) g.dispose();
         }

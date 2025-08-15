@@ -38,13 +38,12 @@ class Setup {
 
     static {
         // Scene 1
+        {
+            // Idle background
+            painters.add(background());
+            durations.add(20);
 
-        // Idle background
-        painters.add(background());
-        durations.add(20);
-
-        // Blinking twice
-        for (int seq = 0; seq < 2; seq++) {
+            // Blinking
             for (int i = 0; i < 4; i++) {
                 painters.add(PaintFunction.combine(background(), blink(i)));
                 durations.add(1);
@@ -55,8 +54,10 @@ class Setup {
             }
         }
 
-        painters.add(background());
-        durations.add(20);
+        // Scene 2
+        {
+            
+        }
     }
 
     static PaintFunction background() {
@@ -81,14 +82,14 @@ class Setup {
                 240, 320,
                 240, 500
             );
-
+            p.fillColor(339, 410, new Color(50, 50, 0));
             p.drawCircle(335, 410, 6);
+            p.fillColor(339, 410, new Color(50, 50, 0));
         };
     }
 
     static PaintFunction blink(int position) {
         return (p) -> {
-            // Blink always on layer 1
             p.setLayer(1);
             p.setOutlineThickness(1);
             p.setOutlineColor(new Color(0, 0, 0));
