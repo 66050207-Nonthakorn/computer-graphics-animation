@@ -11,25 +11,21 @@ import javax.swing.SwingUtilities;
 public class FramePainter extends JPanel {
 
     private int fps;
-    private int width;
-    private int height;
     private int currentFrame;
     private List<Frame> frames;
+    private Painter painter;
 
     public FramePainter(int fps, int width, int height) {
         this.fps = fps;
-        this.width = width;
-        this.height = height;
         this.frames = new ArrayList<>();
+        this.painter = new Painter(width, height);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D)g;
-
         drawFrame(g2d, currentFrame);
-        g2d.dispose();
     }
 
     public void start() {
@@ -55,15 +51,16 @@ public class FramePainter extends JPanel {
     public void addFrame(Frame frame) {
         frames.add(frame);
     }
-
+    
     public void drawFrame(Graphics2D g, int index) {
         if (index < 0 || index >= frames.size())
             return;
 
-        Painter painter = new Painter(g, width, height);
         Frame frame = frames.get(index);
-
-        frame.paint(painter);
-        painter.drawBuffer();
+        
+        this.painter.setGraphics2D(g);
+        this.painter.reset();
+        frame.paint(this.painter);
+        this.painter.drawBuffer();
     }
 }

@@ -2,41 +2,74 @@ package animator;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class Painter {    
+    private static final int MAX_LAYERS = 20;
     private int width;
     private int height;
     private int lineThickness;
     private int currentLayer;
 
     private Graphics2D frameG;
-
     private BufferedImage[] buffer;
     private Graphics2D[] bufferG;
     
-    public Painter(Graphics2D g, int width, int height) {
-        this.frameG = g;
+    public Painter(int width, int height) {
         this.width = width;
         this.height = height;
         
-        this.buffer = new BufferedImage[20];
-        this.bufferG = new Graphics2D[20];
-        for (int i = 0; i < 20; i++) {
-            this.buffer[i] = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
+        this.buffer = new BufferedImage[MAX_LAYERS];
+        this.bufferG = new Graphics2D[MAX_LAYERS];
+        for (int i = 0; i < MAX_LAYERS; i++) {
+            this.buffer[i] = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
             this.bufferG[i] = this.buffer[i].createGraphics();
-            this.bufferG[i].setColor(Color.BLACK);
+            clearBuffer(i);
         }
 
-        this.lineThickness = 1;
         this.currentLayer = 0;
+        this.lineThickness = 1;
+    }
+
+
+    private void clearBuffer(int layer) {
+        bufferG[layer].setBackground(new Color(0, 0, 0, 0));
+        bufferG[layer].clearRect(0, 0, width, height);
+        bufferG[layer].setColor(Color.BLACK);
     }
 
     public void drawBuffer() {
+        if (frameG == null) return;
+
+        frameG.setBackground(new Color(255, 255, 255));
+        frameG.clearRect(0, 0, width, height);
+
         for (BufferedImage img : buffer) {
             frameG.drawImage(img, 0, 0, null);
+        }
+    }
+
+    public void reset() {
+        for (int i = 0; i < MAX_LAYERS; i++) {
+            clearBuffer(i);
+        }
+        currentLayer = 0;
+        lineThickness = 1;
+    }
+
+    public void setGraphics2D(Graphics2D g) {
+        if (this.frameG != g) {
+            this.frameG = g;
+            if (g != null) {
+                g.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON
+                );
+            }
         }
     }
 
@@ -50,6 +83,16 @@ public class Painter {
 
     public void setOutlineThickness(int thickness) {
         this.lineThickness = thickness;
+    }
+
+    public void setScale(int x, int y) {
+        double[] mat = {
+            0, 0,
+            0, 0,
+            x, y
+        };
+
+        frameG.setTransform(new AffineTransform(mat));
     }
     
     public void plot(int x, int y, int size) {
@@ -257,4 +300,11 @@ public class Painter {
         }
     }
 
+    @Override
+    protected void finalize() {
+        // Clean up graphics resources
+        for (Graphics2D g : bufferG) {
+            if (g != null) g.dispose();
+        }
+    }
 }
