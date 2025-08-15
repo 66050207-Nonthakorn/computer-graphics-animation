@@ -10,36 +10,50 @@ public class Painter {
     private int width;
     private int height;
     private int lineThickness;
+    private int currentLayer;
 
-    private BufferedImage buffer;
     private Graphics2D frameG;
-    private Graphics2D bufferG;
+
+    private BufferedImage[] buffer;
+    private Graphics2D[] bufferG;
     
     public Painter(Graphics2D g, int width, int height) {
         this.frameG = g;
         this.width = width;
         this.height = height;
+        
+        this.buffer = new BufferedImage[20];
+        this.bufferG = new Graphics2D[20];
+        for (int i = 0; i < 20; i++) {
+            this.buffer[i] = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
+            this.bufferG[i] = this.buffer[i].createGraphics();
+            this.bufferG[i].setColor(Color.BLACK);
+        }
 
-        this.buffer = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
-        this.bufferG = buffer.createGraphics();
-        this.bufferG.setColor(Color.BLACK);
         this.lineThickness = 1;
+        this.currentLayer = 0;
     }
 
     public void drawBuffer() {
-        frameG.drawImage(buffer, 0, 0, null);
+        for (BufferedImage img : buffer) {
+            frameG.drawImage(img, 0, 0, null);
+        }
+    }
+
+    public void setLayer(int layer) {
+        this.currentLayer = layer;
     }
 
     public void setOutlineColor(Color color) {
-        this.bufferG.setColor(color);
+        this.bufferG[currentLayer].setColor(color);
     }
 
     public void setOutlineThickness(int thickness) {
         this.lineThickness = thickness;
     }
-
+    
     public void plot(int x, int y, int size) {
-        bufferG.fillRect(x, y, size, size);
+        this.bufferG[currentLayer].fillRect(x, y, size, size);
     }
 
     public void plot(int x, int y) {
@@ -201,7 +215,7 @@ public class Painter {
         }
     }
 
-    public void drawPolygon(int[] p) {
+    public void drawPolygon(int... p) {
         for (int i = 0; i < p.length - 3; i += 2) {
             drawLine(p[i], p[i+1], p[i+2], p[i+3]);
         }
@@ -212,13 +226,13 @@ public class Painter {
         queue.add(new Integer[]{x, y});
 
         int replacementColor = color.getRGB();
-        int targetColor = buffer.getRGB(x, y);
+        int targetColor = this.buffer[currentLayer].getRGB(x, y);
 
         if (replacementColor == targetColor) {
             return;
         }
 
-        buffer.setRGB(x, y, replacementColor);
+        this.buffer[currentLayer].setRGB(x, y, replacementColor);
 
         int[] dx = {0, 0, 1, -1};
         int[] dy = {1, -1, 0, 0};
@@ -234,10 +248,10 @@ public class Painter {
                 if (nx < 0 || nx >= width || ny < 0 || ny >= height)
                     continue;
 
-                if (buffer.getRGB(nx, ny) != targetColor)
+                if (this.buffer[currentLayer].getRGB(nx, ny) != targetColor)
                     continue;
 
-                buffer.setRGB(nx, ny, replacementColor);
+                this.buffer[currentLayer].setRGB(nx, ny, replacementColor);
                 queue.add(new Integer[]{nx, ny});
             }
         }
