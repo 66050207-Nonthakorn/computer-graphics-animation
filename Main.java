@@ -1,15 +1,7 @@
 
 import java.awt.Color;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 
 import animator.*;
 
@@ -43,18 +35,6 @@ class Setup {
 
     static List<PaintFunction> painters = new ArrayList<>();
     static List<Integer> durations = new ArrayList<>();
-
-    static Clip clip;
-    static {
-        File file = new File("sounds/paddle_sfx.wav");
-        try {
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(file);
-            clip = AudioSystem.getClip();
-            clip.open(audioStream);
-        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-            e.printStackTrace();
-        }
-    }
 
     static {
         // Scene 1
@@ -204,21 +184,6 @@ class Setup {
                     465, 320,
                     460, 320);
             p.fillColor(138, 300, new Color(255, 255, 255));
-
-            if (ballPosition == 150 || ballPosition == 450) {
-                clip.start();
-
-                Runnable task = () -> {
-                    try {
-                        Thread.sleep(1000);
-                        clip.setMicrosecondPosition(0);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                };
-
-                new Thread(task).start();
-            }
         };
     }
 
